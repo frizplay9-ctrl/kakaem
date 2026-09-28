@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Какаториум — дневник регулярности</title>
+<meta name="description" content="Личный трекер походов в туалет для Димы и Алёны: день, неделя, месяц, год и честное сравнение.">
+<meta name="theme-color" content="#F6EFE6">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💩</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,800;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="decor" aria-hidden="true">
+  <span class="blob blob-a"></span>
+  <span class="blob blob-b"></span>
+  <span class="blob blob-c"></span>
+</div>
+
+<header class="topbar">
+  <div class="wrap topbar-inner">
+    <div class="brand">
+      <span class="brand-mark">💩</span>
+      <div class="brand-text">
+        <h1>Какаториум</h1>
+        <p class="brand-sub">дневник регулярности · Дима &amp; Алёна</p>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <button class="sync-pill" id="syncPill" type="button" title="Статус синхронизации — нажмите, чтобы настроить">
+        <span class="sync-dot"></span><span class="sync-pill-text">локально</span>
+      </button>
+      <div class="who-switch" id="whoSwitch" role="group" aria-label="Кто ходил в туалет"></div>
+      <button class="icon-btn" id="themeToggle" type="button" title="Сменить тему" aria-label="Сменить тему">🌙</button>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs" aria-label="Разделы">
+  <div class="wrap tabs-inner" role="tablist">
+    <button class="tab is-active" type="button" data-tab="today" role="tab" aria-selected="true">☀️ Сегодня</button>
+    <button class="tab" type="button" data-tab="stats" role="tab" aria-selected="false">📊 Статистика</button>
+    <button class="tab" type="button" data-tab="compare" role="tab" aria-selected="false">⚖️ Сравнение</button>
+    <button class="tab" type="button" data-tab="history" role="tab" aria-selected="false">🗂 История</button>
+    <button class="tab" type="button" data-tab="data" role="tab" aria-selected="false">💾 Данные</button>
+  </div>
+</nav>
+
+<main class="wrap main">
+
+  <!-- ============ СЕГОДНЯ ============ -->
+  <section class="panel is-active" id="tab-today" role="tabpanel">
+
+    <div class="hero card">
+      <div class="hero-copy">
+        <p class="eyebrow"><span id="heroDate">—</span></p>
+        <h2 class="hero-title">Кто сегодня ходил<br><em>по-большому?</em></h2>
+        <p class="hero-lead">Отметьте поход одним нажатием — статистика за день, неделю и год посчитается сама.</p>
+        <div class="hero-facts" id="heroFacts"></div>
+      </div>
+
+      <form class="logbox" id="logForm">
+        <div class="field">
+          <span class="field-label">Кто</span>
+          <div class="chip-row" id="formWho"></div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Когда <span class="field-hint" id="whenHint">сейчас</span></span>
+          <input class="input" type="datetime-local" id="formWhen">
+        </div>
+
+        <div class="field">
+          <span class="field-label">По шкале Бристоль <span class="field-hint" id="typeHint">идеал</span></span>
+          <div class="chip-row bristol-row" id="formType"></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="field">
+            <span class="field-label">Сколько минут <span class="field-hint">необязательно</span></span>
+            <div class="stepper">
+              <button class="step-btn" type="button" data-step="-5" aria-label="Меньше">−</button>
+              <input class="input input-num" type="number" id="formDuration" min="0" max="300" step="1" placeholder="7">
+              <button class="step-btn" type="button" data-step="5" aria-label="Больше">+</button>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label">Заметка <span class="field-hint">кофе, спорт, боль…</span></span>
+            <input class="input" type="text" id="formNote" maxlength="140" placeholder="Например: после тренировки">
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" type="submit">
+          <span class="btn-emoji">💩</span> Записать поход
+        </button>
+
+        <div class="quick">
+          <span class="quick-label">Быстро, без деталей:</span>
+          <div class="quick-btns" id="quickAdd"></div>
+        </div>
+      </form>
+    </div>
+
+    <div class="grid-2 today-grid">
+      <div class="card person-day" id="todayDima"></div>
+      <div class="card person-day" id="todayAlena"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Пульс последних 14 дней</h3>
+        <p class="card-note">Каждый столбик — день, цвет — кто старался</p>
+      </div>
+      <div class="chart" id="chartSpark"></div>
+      <div class="legend" id="legendSpark"></div>
+    </div>
+  </section>
+
+  <!-- ============ СТАТИСТИКА ============ -->
+  <section class="panel" id="tab-stats" role="tabpanel">
+    <div class="card">
+      <div class="card-head card-head-row">
+        <div>
+          <h3>Обзор периода</h3>
+          <p class="card-note" id="statsRangeNote">—</p>
+        </div>
+        <div class="seg" data-period-seg role="group" aria-label="Период">
+          <button type="button" data-period="day">День</button>
+          <button type="button" data-period="week" class="is-active">Неделя</button>
+          <button type="button" data-period="month">Месяц</button>
+          <button type="button" data-period="year">Год</button>
+        </div>
+      </div>
+      <div class="kpis" id="kpis"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3 id="mainChartTitle">Динамика</h3>
+        <p class="card-note" id="mainChartNote">—</p>
+      </div>
+      <div class="chart chart-lg" id="chartMain"></div>
+      <div class="legend" id="legendMain"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <h3>Качество по шкале Бристоль</h3>
+          <p class="card-note">1 — «орешки», 4 — идеал, 7 — хаос</p>
+        </div>
+        <div id="bristolChart" class="bars-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>В какое время вы ходите</h3>
+          <p class="card-note">Суммарно за выбранный период</p>
+        </div>
+        <div class="chart" id="chartHours"></div>
+        <div class="legend" id="legendHours"></div>
+      </div>
+    </div>
+
+    <div class="card" id="heatCard">
+      <div class="card-head card-head-row">
+        <div>
+          <h3 id="heatTitle">Календарь</h3>
+          <p class="card-note" id="heatNote">—</p>
+        </div>
+        <div class="seg seg-sm" id="heatSeg" role="group" aria-label="Чей календарь">
+          <button type="button" data-heat="all" class="is-active">Оба</button>
+          <button type="button" data-heat="dima">Дима</button>
+          <button type="button" data-heat="alena">Алёна</button>
+        </div>
+      </div>
+      <div class="heat-scroll"><div id="heatChart"></div></div>
+      <div class="heat-legend">
+        <span>реже</span>
+        <i></i><i></i><i></i><i></i><i></i>
+        <span>чаще</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Интересные факты</h3>
+        <p class="card-note">Автоматические выводы из вашей истории</p>
+      </div>
+      <ul class="facts" id="facts"></ul>
+    </div>
+  </section>
+
+  <!-- ============ СРАВНЕНИЕ ============ -->
+  <section class="panel" id="tab-compare" role="tabpanel">
+    <div class="card versus" id="versus"></div>
+
+    <div class="period-bar">
+      <span class="period-bar-label">Период сравнения</span>
+      <div class="seg" data-period-seg role="group" aria-label="Период">
+        <button type="button" data-period="day">День</button>
+        <button type="button" data-period="week" class="is-active">Неделя</button>
+        <button type="button" data-period="month">Месяц</button>
+        <button type="button" data-period="year">Год</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Личное первенство</h3>
+        <p class="card-note" id="duelNote">—</p>
+      </div>
+      <div class="duel" id="duel"></div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-head">
+          <h3>Кто регулярнее</h3>
+          <p class="card-note">Доля дней в периоде, когда был хотя бы один поход</p>
+        </div>
+        <div id="regularity" class="bars-list"></div>
+      </div>
+      <div class="card">
+        <div class="card-head">
+          <h3>Хронология: кто раньше встал</h3>
+          <p class="card-note">Накопительная сумма походов за период</p>
+        </div>
+        <div class="chart" id="chartCum"></div>
+        <div class="legend" id="legendCum"></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Синхронность</h3>
+        <p class="card-note">Дни, когда ходили оба, — и кто в такие дни выигрывал</p>
+      </div>
+      <div class="sync" id="sync"></div>
+    </div>
+  </section>
+
+  <!-- ============ ИСТОРИЯ ============ -->
+  <section class="panel" id="tab-history" role="tabpanel">
+    <div class="card">
+      <div class="card-head card-head-row">
+        <div>
+          <h3>Все записи</h3>
+          <p class="card-note" id="historyNote">—</p>
+        </div>
+        <div class="seg seg-sm" id="historySeg" role="group" aria-label="Фильтр">
+          <button type="button" data-filter="all" class="is-active">Все</button>
+          <button type="button" data-filter="dima">Дима</button>
+          <button type="button" data-filter="alena">Алёна</button>
+        </div>
+      </div>
+      <div id="historyList" class="history"></div>
+    </div>
+  </section>
+
+  <!-- ============ ДАННЫЕ ============ -->
+  <section class="panel" id="tab-data" role="tabpanel">
+
+    <div class="card sync-card">
+      <div class="card-head card-head-row">
+        <div>
+          <h3>Общая база Димы и Алёны</h3>
+          <p class="card-note" id="syncNote">—</p>
+        </div>
+        <div class="seg seg-sm" id="driverSeg" role="group" aria-label="Способ синхронизации">
+          <button type="button" data-driver="off" class="is-active">Выключено</button>
+          <button type="button" data-driver="server">Свой сервер</button>
+          <button type="button" data-driver="gist">GitHub Gist</button>
+        </div>
+      </div>
+
+      <div class="sync-state" id="syncState"></div>
+
+      <div class="sync-body" id="syncBody"></div>
+
+      <div class="sync-actions">
+        <button class="btn btn-primary" type="button" id="btnSyncNow">🔄 Синхронизировать сейчас</button>
+        <button class="btn" type="button" id="btnSyncTest">Проверить связь</button>
+        <label class="switch">
+          <input type="checkbox" id="syncAuto" checked>
+          <span>обновлять автоматически</span>
+        </label>
+        <label class="switch">
+          <span>каждые</span>
+          <select class="input input-sm" id="syncInterval">
+            <option value="30">30 сек</option>
+            <option value="60" selected>1 минуту</option>
+            <option value="300">5 минут</option>
+            <option value="900">15 минут</option>
+          </select>
+        </label>
+        <button class="btn btn-ghost" type="button" id="btnSyncForget">Забыть настройки</button>
+      </div>
+
+      <div class="sync-devices" id="syncDevices"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Перенос вручную (запасной способ)</h3>
+        <p class="card-note">Работает без интернета и сервера: передайте код или файл JSON друг другу, записи объединятся без дублей. Удаления тоже учитываются.</p>
+      </div>
+      <div class="data-actions">
+        <button class="btn" type="button" id="btnCopyCode">📋 Скопировать код</button>
+        <button class="btn" type="button" id="btnExport">⬇️ Скачать JSON</button>
+        <button class="btn" type="button" id="btnImportFile">⬆️ Загрузить JSON-файл</button>
+        <input type="file" id="fileInput" accept="application/json,.json" hidden>
+      </div>
+      <div class="field">
+        <span class="field-label">Код переноса</span>
+        <textarea class="input code-out" id="codeOut" readonly rows="3" placeholder="Нажмите «Скопировать код», чтобы получить строку"></textarea>
+      </div>
+      <div class="field">
+        <span class="field-label">Импорт по коду</span>
+        <div class="import-row">
+          <textarea class="input" id="codeIn" rows="3" placeholder="Вставьте код от второго человека…"></textarea>
+          <button class="btn btn-primary" type="button" id="btnImportCode">Объединить</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card-danger">
+      <div class="card-head">
+        <h3>Опасная зона</h3>
+        <p class="card-note">Действия необратимы и при включённой синхронизации удалят записи у обоих</p>
+      </div>
+      <div class="data-actions">
+        <button class="btn" type="button" id="btnDemo">✨ Загрузить демо-данные</button>
+        <button class="btn btn-ghost" type="button" id="btnClearDemo">Удалить демо-записи</button>
+        <button class="btn btn-danger" type="button" id="btnWipe">Удалить всё</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Какаториум · сделано с заботой о вашей регулярности 💩</p>
+    <p class="footer-note">Данные не покидают ваш браузер. Это не медицинская рекомендация.</p>
+  </div>
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/storage.js"></script>
+<script src="js/charts.js"></script>
+<script src="js/sync.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
